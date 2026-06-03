@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+:root {
+  --bg:       #0a090d;
+  --surface:  #13111a;
+  --surface2: #1c1926;
+  --border:   #2a2535;
+  --text:     #f0e6cc;
+  --muted:    #7a7060;
+  --accent:   #c8973a;
+  --danger:   #e05555;
+  --good:     #5ab870;
+  --rare:     #4a9eff;
+  --epic:     #a855f7;
+  --legendary:#f59e0b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist), "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+/* ── Rarity borders ─────────────────── */
+.rarity-common    { border-color: #4a4560; }
+.rarity-rare      { border-color: #4a9eff; box-shadow: 0 0 8px #4a9eff44; }
+.rarity-epic      { border-color: #a855f7; box-shadow: 0 0 12px #a855f755; }
+.rarity-legendary { border-color: #f59e0b; box-shadow: 0 0 16px #f59e0b66; }
+.rarity-mythic    {
+  border-color: transparent;
+  animation: mythic-border 3s linear infinite;
+  box-shadow: 0 0 20px #ff007755;
+}
+
+@keyframes mythic-border {
+  0%   { box-shadow: 0 0 20px #ff0077aa, 0 0 40px #ff007744; }
+  25%  { box-shadow: 0 0 20px #7700ffaa, 0 0 40px #7700ff44; }
+  50%  { box-shadow: 0 0 20px #00aaffaa, 0 0 40px #00aaff44; }
+  75%  { box-shadow: 0 0 20px #00ff88aa, 0 0 40px #00ff8844; }
+  100% { box-shadow: 0 0 20px #ff0077aa, 0 0 40px #ff007744; }
+}
+
+.rarity-mythic-text {
+  background: linear-gradient(90deg, #ff0077, #7700ff, #00aaff, #00ff88, #ff0077);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: mythic-text 3s linear infinite;
+}
+@keyframes mythic-text { to { background-position: 200% center; } }
+
+/* ── HP bar ─────────────────── */
+.hp-bar { transition: width 0.5s ease; }
+.hp-bar-high  { background: #5ab870; }
+.hp-bar-mid   { background: #d4943a; }
+.hp-bar-low   { background: #e05555; animation: hp-warn 0.8s ease-in-out infinite; }
+@keyframes hp-warn { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+
+/* ── Basic card animations ─────────────────── */
+@keyframes card-deal {
+  from { opacity:0; transform: translateY(24px) scale(0.9); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+@keyframes pop-in {
+  from { opacity:0; transform: scale(0.8); }
+  to   { opacity:1; transform: scale(1); }
+}
+@keyframes slide-up {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-8px); }
+}
+
+.anim-deal     { animation: card-deal 0.35s ease-out; }
+.anim-pop      { animation: pop-in  0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.anim-slide-up { animation: slide-up 0.5s ease-out; }
+.anim-float    { animation: float 3s ease-in-out infinite; }
+
+/* ── Clash: card slide-in ─────────────────── */
+@keyframes slide-from-left {
+  from { opacity:0; transform: translateX(-120px) scale(0.85); }
+  to   { opacity:1; transform: translateX(0) scale(1); }
+}
+@keyframes slide-from-right {
+  from { opacity:0; transform: translateX(120px) scale(0.85); }
+  to   { opacity:1; transform: translateX(0) scale(1); }
+}
+.clash-enter-player { animation: slide-from-left  0.45s cubic-bezier(0.22,1,0.36,1) forwards; }
+.clash-enter-enemy  { animation: slide-from-right 0.45s cubic-bezier(0.22,1,0.36,1) forwards; animation-delay: 0.12s; opacity:0; }
+
+/* ── Clash: impact shake ─────────────────── */
+@keyframes shake-sm {
+  0%,100% { transform: translate(0,0); }
+  20%     { transform: translate(-3px, 1px); }
+  40%     { transform: translate(3px,-2px); }
+  60%     { transform: translate(-2px, 3px); }
+  80%     { transform: translate(2px,-1px); }
+}
+@keyframes shake-lg {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  10%     { transform: translate(-5px, 2px) rotate(-0.3deg); }
+  25%     { transform: translate(5px,-4px) rotate(0.3deg); }
+  40%     { transform: translate(-4px, 5px) rotate(-0.2deg); }
+  55%     { transform: translate(4px,-3px) rotate(0.2deg); }
+  70%     { transform: translate(-3px, 2px) rotate(-0.1deg); }
+  85%     { transform: translate(2px,-1px) rotate(0.1deg); }
+}
+.shake-sm { animation: shake-sm 0.3s ease-out; }
+.shake-lg { animation: shake-lg 0.8s ease-out; }
+
+/* ── Clash: card crack / break ─────────────────── */
+@keyframes card-crack {
+  0%   { filter: brightness(1) saturate(1); transform: scale(1); }
+  30%  { filter: brightness(1.5) saturate(1.3) hue-rotate(-15deg); transform: scale(1.06); }
+  60%  { filter: brightness(0.7) saturate(0.5); transform: scale(0.95) rotate(2deg); }
+  100% { filter: brightness(0.3) saturate(0) opacity(0.4); transform: scale(0.85) rotate(5deg); }
+}
+@keyframes card-blast {
+  0%   { filter: brightness(1); transform: scale(1) translateX(0); opacity:1; }
+  30%  { filter: brightness(2); transform: scale(1.1) translateX(10px); }
+  100% { filter: brightness(0); transform: scale(0.6) translateX(60px); opacity:0; }
+}
+.card-cracking { animation: card-crack 0.8s ease-out forwards; }
+.card-blasting { animation: card-blast 0.6s ease-out forwards; }
+
+/* ── Clash: glow colors ─────────────────── */
+.clash-white  { box-shadow: 0 0 24px #ffffff88, 0 0 48px #ffffff44; border-color: #ccc !important; }
+.clash-red    { box-shadow: 0 0 24px #ff444488, 0 0 48px #ff444444; border-color: #ff4444 !important; }
+.clash-green  { box-shadow: 0 0 24px #22c55e88, 0 0 48px #22c55e44; border-color: #22c55e !important; }
+.clash-gold   { box-shadow: 0 0 30px #eab30888, 0 0 60px #eab30844; border-color: #eab308 !important; animation: gold-pulse 0.5s ease-in-out infinite; }
+.clash-rainbow{
+  border-color: #a855f7 !important;
+  animation: rainbow-border 0.4s linear infinite;
+  box-shadow: 0 0 40px #ff007755, 0 0 80px #7700ff44;
+}
+
+@keyframes gold-pulse {
+  0%,100% { box-shadow: 0 0 30px #eab30888, 0 0 60px #eab30844; }
+  50%     { box-shadow: 0 0 50px #eab308cc, 0 0 100px #eab30866; }
+}
+@keyframes rainbow-border {
+  0%   { border-color: #ff0077 !important; box-shadow: 0 0 40px #ff007799; }
+  25%  { border-color: #7700ff !important; box-shadow: 0 0 40px #7700ff99; }
+  50%  { border-color: #00aaff !important; box-shadow: 0 0 40px #00aaff99; }
+  75%  { border-color: #00ff88 !important; box-shadow: 0 0 40px #00ff8899; }
+  100% { border-color: #ff0077 !important; box-shadow: 0 0 40px #ff007799; }
+}
+
+/* ── Flash overlay ─────────────────── */
+.flash-overlay {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity 0.04s;
+}
+.flash-overlay.active { opacity: 0.75; }
+
+/* ── Floating text (damage / CRITICAL) ─────────────────── */
+@keyframes float-up-fade {
+  0%   { opacity:1; transform: translateY(0) scale(1); }
+  70%  { opacity:1; transform: translateY(-50px) scale(1.15); }
+  100% { opacity:0; transform: translateY(-80px) scale(0.8); }
+}
+.floating-text {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9997;
+  font-weight: 900;
+  animation: float-up-fade 1.4s ease-out forwards;
+  text-shadow: 0 0 12px currentColor;
+}
+
+/* ── Particle ─────────────────── */
+.particle {
+  position: fixed;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9996;
+}
+
+/* ── CRITICAL / OVERKILL text ─────────────────── */
+@keyframes critical-pop {
+  0%   { opacity:0; transform: scale(0.5) rotate(-8deg); }
+  40%  { opacity:1; transform: scale(1.2) rotate(3deg); }
+  70%  { transform: scale(0.95) rotate(-1deg); }
+  100% { opacity:1; transform: scale(1) rotate(0); }
+}
+@keyframes overkill-pop {
+  0%   { opacity:0; transform: scale(0) rotate(-12deg); }
+  50%  { opacity:1; transform: scale(1.4) rotate(4deg); }
+  75%  { transform: scale(0.9) rotate(-2deg); }
+  100% { opacity:1; transform: scale(1.1) rotate(0); }
+}
+.critical-text { animation: critical-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.overkill-text { animation: overkill-pop 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+/* ── Combo counter ─────────────────── */
+@keyframes combo-pop {
+  0%   { transform: scale(0.6); opacity:0; }
+  60%  { transform: scale(1.25); opacity:1; }
+  100% { transform: scale(1); opacity:1; }
+}
+@keyframes combo-fire {
+  0%,100% { filter: brightness(1) hue-rotate(0deg); }
+  50%     { filter: brightness(1.3) hue-rotate(20deg); }
+}
+.combo-pop  { animation: combo-pop  0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.combo-fire { animation: combo-fire 0.8s ease-in-out infinite; }
+
+/* ── Background HP pulse ─────────────────── */
+@keyframes bg-pulse-subtle { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.12) saturate(1.2); } }
+@keyframes bg-pulse-medium { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.2) saturate(1.4); } }
+@keyframes bg-pulse-intense { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.3) saturate(1.6); } }
+.bg-pulse-subtle  { animation: bg-pulse-subtle  3s ease-in-out infinite; }
+.bg-pulse-medium  { animation: bg-pulse-medium  2s ease-in-out infinite; }
+.bg-pulse-intense { animation: bg-pulse-intense 1s ease-in-out infinite; }
+
+/* ── Card flip (reward) ─────────────────── */
+.card-flip-wrap  { perspective: 900px; }
+.card-flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+.card-flip-inner.slow { transition-duration: 1.3s; }
+.card-flip-inner.flipped { transform: rotateY(180deg); }
+.card-flip-front, .card-flip-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  position: absolute; inset: 0;
+}
+.card-flip-back  { transform: rotateY(0deg); }
+.card-flip-front { transform: rotateY(180deg); }
+
+/* ── Category gradients ─────────────────── */
+.cat-自然      { background: linear-gradient(145deg,#0d2010,#1a3a20); }
+.cat-道具      { background: linear-gradient(145deg,#1a1a2a,#252540); }
+.cat-日常      { background: linear-gradient(145deg,#2a1a0a,#3a2a15); }
+.cat-生物      { background: linear-gradient(145deg,#0d200d,#1a3a1a); }
+.cat-兵器      { background: linear-gradient(145deg,#200d0d,#3a1515); }
+.cat-食べ物    { background: linear-gradient(145deg,#2a1a00,#3a2a10); }
+.cat-現代      { background: linear-gradient(145deg,#0a1a2a,#152535); }
+.cat-回復      { background: linear-gradient(145deg,#1a0d1a,#2a1530); }
+.cat-災害      { background: linear-gradient(145deg,#2a0d0d,#400000); }
+.cat-宇宙      { background: linear-gradient(145deg,#050515,#0a0a30); }
+.cat-概念      { background: linear-gradient(145deg,#0d0d1a,#15102a); }
+.cat-防具      { background: linear-gradient(145deg,#1a1a1a,#2a2a2a); }
+.cat-素材      { background: linear-gradient(145deg,#1a1000,#2a2010); }
+.cat-テクノロジー { background: linear-gradient(145deg,#00151a,#002530); }
+.cat-鉱物      { background: linear-gradient(145deg,#0a0a1a,#151530); }
+.cat-建物      { background: linear-gradient(145deg,#1a1a00,#2a2a10); }
+
+/* ── Scrollbar ─────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Noise texture ─────────────────── */
+.noise::after {
+  content:''; position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999;
+}
