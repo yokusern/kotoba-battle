@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gen-cards": "python3 gen_cards.py"
   },
   "dependencies": {
     "next": "16.2.7",

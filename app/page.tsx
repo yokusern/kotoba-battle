@@ -9,7 +9,7 @@ import {
   loadSave, writeSave, clearSave, emptySave,
   type AIType, type Card, type Stage, type JudgeResult, type SaveData,
 } from "../lib/engine";
-import { getSpriteStyle } from "../lib/sprites";
+import { getSpriteStyle, SPRITE_MAP } from "../lib/sprites";
 
 // ═══════════════════════ CONSTANTS ═══════════════════════
 const MAX_HAND = 7;
@@ -30,34 +30,62 @@ const CAT_ICON: Record<string, string> = {
 };
 
 // ═══════════════════════ CARD IMAGE ═══════════════════════
-function CardImage({ card, className = "" }: { card: Card; className?: string }) {
-  const [err, setErr] = useState(false);
-  const sprite = getSpriteStyle(card.id);
+// Detect if a sprite sheet actually loaded (CSS background-image has no onError)
+const sheetCache: Record<number, boolean | undefined> = {};
+function useSheetLoaded(sheet: number): boolean | null {
+  const [loaded, setLoaded] = useState<boolean | null>(sheetCache[sheet] ?? null);
+  useEffect(() => {
+    if (sheetCache[sheet] !== undefined) { setLoaded(sheetCache[sheet]!); return; }
+    const img = new window.Image();
+    img.onload  = () => { sheetCache[sheet] = true;  setLoaded(true);  };
+    img.onerror = () => { sheetCache[sheet] = false; setLoaded(false); };
+    img.src = `/cards/sheet${sheet}.webp`;
+  }, [sheet]);
+  return loaded;
+}
 
-  if (!err && sprite) {
+function CardImage({ card, className = "" }: { card: Card; className?: string }) {
+  const [imgErr, setImgErr] = useState(false);
+  const sprite = getSpriteStyle(card.id);
+  const sheetNum = sprite ? (SPRITE_MAP[card.id]?.sheet ?? 0) : 0;
+  const sheetOk = useSheetLoaded(sheetNum);
+
+  // Sprite sheet available and loaded
+  if (sprite && sheetOk === true) {
     return (
-      <div
-        className={className}
-        style={{ ...sprite, width: "100%", height: "100%" }}
-        onError={() => setErr(true)}
-      />
+      <div className={className} style={{ ...sprite, width: "100%", height: "100%" }} />
     );
   }
-  if (!err) {
+
+  // Individual image fallback (while sheet loads or if sheet failed)
+  if (sheetOk !== true && !imgErr) {
     return (
       <img
         src={card.image}
         alt={card.name}
         className={`w-full h-full object-cover ${className}`}
-        onError={() => setErr(true)}
+        onError={() => setImgErr(true)}
         style={{ display: "block" }}
       />
     );
   }
+
   // Text fallback
+  const catColors: Record<string, string> = {
+    自然:"#1a3a20", 道具:"#1a1a2a", 日常:"#2a1a0a", 生物:"#0d200d",
+    兵器:"#200d0d", 食べ物:"#2a1a00", 現代:"#0a1a2a", 回復:"#1a0d1a",
+    災害:"#2a0d0d", 宇宙:"#050515", 概念:"#0d0d1a", 防具:"#1a1a1a",
+    素材:"#1a1000", テクノロジー:"#00151a", 鉱物:"#0a0a1a", 建物:"#1a1a00",
+  };
   return (
-    <div className={`flex items-center justify-center ${className}`}>
-      <span className="text-4xl font-black" style={{ color: "var(--text)" }}>{card.name[0]}</span>
+    <div className={`flex flex-col items-center justify-center gap-1 ${className}`}
+      style={{ background: catColors[card.category] ?? "#111", width:"100%", height:"100%" }}>
+      <span className="text-3xl font-black leading-none" style={{ color:"var(--text)" }}>
+        {card.name.length <= 2 ? card.name : card.name.slice(0,2)}
+      </span>
+      {card.name.length > 2 && (
+        <span className="text-sm font-bold" style={{ color:"var(--muted)" }}>{card.name.slice(2)}</span>
+      )}
     </div>
   );
 }
