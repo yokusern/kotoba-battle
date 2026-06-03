@@ -179,6 +179,91 @@ function CardComp({
   );
 }
 
+// ═══════════════════════ BATTLE SIDEBAR ═══════════════════════
+function BattleSidebar({ stageName, stageDesc, enemyHp, enemyMaxHp, combo }: {
+  stageName: string; stageDesc: string; enemyHp: number; enemyMaxHp: number; combo: number;
+}) {
+  const MATCHUPS = [
+    ["💧","🔥","水は火に勝つ"],["🔥","🌿","火は木に勝つ"],["🌿","💧","木は水に勝つ"],
+    ["⚡","💧","雷は水に勝つ"],["🪨","✂️","硬いは刃物に勝つ"],["✂️","📄","刃物は紙に勝つ"],
+    ["🛡️","⚔️","盾は物理に勝つ"],["💣","🛡️","爆発は防御貫通"],
+  ];
+  return (
+    <aside className="battle-sidebar">
+      <section className="sidebar-section">
+        <div className="sidebar-title">⚔️ 勝利条件</div>
+        <div className="sidebar-content">
+          <p>敵HPを0にすれば勝利</p>
+          <p>自分HPが0で敗北</p>
+        </div>
+      </section>
+      <div className="sidebar-divider" />
+      <section className="sidebar-section">
+        <div className="sidebar-title">📊 バトル状況</div>
+        <div className="sidebar-content">
+          <p style={{color:"#ccc",fontWeight:700}}>{stageName}</p>
+          <p>{stageDesc}</p>
+          <p>敵HP: <span style={{color:"#e05555",fontWeight:700}}>{Math.max(0,enemyHp)}/{enemyMaxHp}</span></p>
+          {combo>=3&&<p style={{color:"#f59e0b",fontWeight:700}}>🔥 {combo}連勝中！</p>}
+        </div>
+      </section>
+      <div className="sidebar-divider" />
+      <section className="sidebar-section">
+        <div className="sidebar-title">🔄 相性チャート</div>
+        {MATCHUPS.map(([a,b,txt])=>(
+          <div key={txt} className="matchup-row">
+            <span className="matchup-icon">{a}</span>
+            <span className="matchup-arrow">→</span>
+            <span className="matchup-icon">{b}</span>
+            <span className="matchup-text">{txt}</span>
+          </div>
+        ))}
+      </section>
+      <div className="sidebar-divider" />
+      <section className="sidebar-section">
+        <div className="sidebar-title">💥 ダメージ</div>
+        <div className="damage-rules">
+          <div className="damage-rule"><span className="damage-label good">相性勝ち</span><span>ATK × 1.5</span></div>
+          <div className="damage-rule"><span className="damage-label neutral">通常勝ち</span><span>ATK差で判定</span></div>
+          <div className="damage-rule"><span className="damage-label bad">相性負け</span><span>被ダメ × 1.5</span></div>
+          <div className="damage-rule"><span className="damage-label draw">引き分け</span><span>ATK差2以内</span></div>
+        </div>
+      </section>
+      <div className="sidebar-divider" />
+      <section className="sidebar-section">
+        <div className="sidebar-title">🔥 コンボ</div>
+        <div className="sidebar-content">
+          <div className="combo-rule">3連勝: ATK+2</div>
+          <div className="combo-rule">5連勝: ATK+5 🔥</div>
+          <div className="combo-rule">7連勝: ATK+8 🌈</div>
+          <div className="combo-rule" style={{color:"#a855f7"}}>負けると途切れる</div>
+        </div>
+      </section>
+      <div className="sidebar-divider" />
+      <section className="sidebar-section">
+        <div className="sidebar-title">💡 ヒント</div>
+        <div className="sidebar-tips">
+          <p>カードのタグで相性を判断</p>
+          <p>回復は瀕死時に温存</p>
+          <p>敵AIにはクセがある</p>
+          <p>連勝が途切れたらREVENGE!</p>
+        </div>
+      </section>
+    </aside>
+  );
+}
+
+function MobileMatchupBar() {
+  return (
+    <div className="mobile-matchup-bar">
+      {[["💧","🔥"],["🔥","🌿"],["🌿","💧"],["⚡","💧"],["🪨","✂️"],["✂️","📄"],["🛡️","⚔️"],["💣","🛡️"]].map(([a,b])=>(
+        <span key={a+b} style={{flexShrink:0,color:"#888"}}>{a}<span style={{color:"#ef4444",fontWeight:900,margin:"0 1px"}}>›</span>{b}</span>
+      ))}
+      <span style={{flexShrink:0,color:"#f59e0b",fontSize:10,marginLeft:6}}>3連勝ATK+2</span>
+    </div>
+  );
+}
+
 // ═══════════════════════ HP BAR ═══════════════════════
 function HPBar({ hp, maxHp, label }: { hp:number; maxHp:number; label:string }) {
   const pct = Math.max(0, Math.min(100, (hp/maxHp)*100));
@@ -650,10 +735,12 @@ export default function KotobaBattle() {
     const bgColor = ePct>0.7?"#0a090d":ePct>0.4?"#120a0a":ePct>0.2?"#1a0808":"#200505";
 
     const clashCls = clashColor?`clash-${clashColor}`:"";
+    const shakeCls = isShaking ? "shake-"+shakeIntensity : "";
+    const pulseCls = bgPulse ? "bg-pulse-"+bgPulse : "";
+    const layoutCls = ["battle-layout", shakeCls, pulseCls].filter(Boolean).join(" ");
 
     return (
-      <div className={`min-h-[100dvh] flex flex-col relative ${isShaking?`shake-${shakeIntensity}`:""} ${bgPulse?`bg-pulse-${bgPulse}`:""}`}
-        style={{background:bgColor, maxWidth:480, margin:"0 auto"}}>
+      <div className={layoutCls}>
 
         {/* Flash overlay */}
         <div className={`flash-overlay ${flashActive?"active":""}`} style={{background:flashColor}} />
@@ -673,6 +760,20 @@ export default function KotobaBattle() {
             {ft.text}
           </div>
         ))}
+
+        {/* Desktop sidebar */}
+        <BattleSidebar
+          stageName={currentStage.name}
+          stageDesc={currentStage.description}
+          enemyHp={enemy.hp}
+          enemyMaxHp={enemy.maxHp}
+          combo={combo}
+        />
+
+        <div className="battle-main" style={{background:bgColor}}>
+
+        {/* Mobile matchup bar */}
+        <MobileMatchupBar />
 
         {/* Enemy header */}
         <div className="px-4 pt-4 pb-3 flex-shrink-0" style={{background:"var(--surface)",borderBottom:"1px solid var(--border)"}}>
@@ -778,6 +879,7 @@ export default function KotobaBattle() {
             {player.atkBoost>0&&<span style={{color:"var(--accent)"}}>ATK+{player.atkBoost}</span>}
             {player.shield>0&&<span style={{color:"var(--rare)"}}>🛡 {player.shield}</span>}
           </div>
+        </div>
         </div>
       </div>
     );
